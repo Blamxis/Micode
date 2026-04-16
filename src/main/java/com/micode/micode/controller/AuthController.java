@@ -1,5 +1,7 @@
 package com.micode.micode.controller;
 
+import com.micode.micode.dto.LoginRequest;
+import com.micode.micode.dto.LoginResponse;
 import com.micode.micode.dto.RegisterRequest;
 import com.micode.micode.dto.RegisterResponse;
 import com.micode.micode.service.UserService;
@@ -25,5 +27,14 @@ public class AuthController {
             clientIp = httpRequest.getRemoteAddr();
         }
         return userService.register(registerRequest, clientIp);
+    }
+
+    @PostMapping("/login")
+    public LoginResponse login(@Valid @RequestBody LoginRequest loginRequest, HttpServletRequest httpRequest) {
+        String clientIp = httpRequest.getHeader("X-Forwarded-For");
+        if (clientIp == null) {
+            clientIp = httpRequest.getRemoteAddr();
+        }
+        return userService.login(loginRequest, clientIp);
     }
 }
