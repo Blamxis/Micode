@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
@@ -13,8 +14,11 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    // --- Clé secrète sécurisée (256 bits) ---
-    private final Key secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    @Value("${jwt.secret}")
+    private String secret;
+    private Key getSigningKey() {
+        return Keys.hmacShaKeyFor(secret.getBytes());
+    }
 
     // --- Durée de validité du token : 24h ---
     private final long expirationMs = 24 * 60 * 60 * 1000;
@@ -25,7 +29,7 @@ public class JwtService {
                 .setSubject(email)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
-                .signWith(secretKey)
+                .signWith(getSigningKey(),  SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -37,7 +41,7 @@ public class JwtService {
     // --- Extraction générique d'un claim ---
     public <T> T extractClaim(String token, Function<Claims, T> resolver) {
         Claims claims = Jwts.parserBuilder()
-                .setSigningKey(secretKey)
+                .setSigningKey(getSigningKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
