@@ -1,15 +1,15 @@
 package com.micode.micode.controller;
 
+import com.micode.micode.dto.LoginRequest;
+import com.micode.micode.dto.LoginResponse;
 import com.micode.micode.dto.RegisterRequest;
 import com.micode.micode.dto.RegisterResponse;
 import com.micode.micode.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,5 +25,26 @@ public class AuthController {
             clientIp = httpRequest.getRemoteAddr();
         }
         return userService.register(registerRequest, clientIp);
+    }
+
+    @PostMapping("/login")
+    public LoginResponse login(@Valid @RequestBody LoginRequest loginRequest, HttpServletRequest httpRequest) {
+        String clientIp = httpRequest.getHeader("X-Forwarded-For");
+        if (clientIp == null) {
+            clientIp = httpRequest.getRemoteAddr();
+        }
+        return userService.login(loginRequest, clientIp);
+    }
+
+    @GetMapping("/me")
+    public RegisterResponse me(Authentication authentication) {
+        String email = authentication.getName();
+        var user = userService.findByEmail(email);
+
+        return new RegisterResponse(
+                "User authenticated",
+                user.getEmail(),
+                user.getUsername()
+        );
     }
 }
