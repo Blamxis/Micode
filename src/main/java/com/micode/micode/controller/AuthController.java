@@ -2,6 +2,7 @@ package com.micode.micode.controller;
 
 import com.micode.micode.dto.*;
 import com.micode.micode.model.RefreshToken;
+import com.micode.micode.model.User;
 import com.micode.micode.security.JwtService;
 import com.micode.micode.service.RefreshTokenService;
 import com.micode.micode.service.UserService;
@@ -82,4 +83,20 @@ public class AuthController {
         );
     }
 
+    @PostMapping("/logout")
+
+    public ResponseEntity<String> logout(Authentication authentication) {
+
+        if (authentication == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated");
+
+        }
+
+        String email = authentication.getName();
+        User user = userService.findByEmail(email);
+
+        refreshTokenService.deleteByUser(user);
+
+        return ResponseEntity.ok("Logged out successfully");
+    }
 }
