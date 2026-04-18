@@ -21,6 +21,9 @@ public class RefreshTokenService {
     private final long refreshTokenDurationMs = 7 * 24 * 60 * 60 * 1000;
 
     public RefreshToken createRefreshToken(User user) {
+
+        refreshTokenRepository.deleteByUser(user);
+
         RefreshToken refreshToken = RefreshToken.builder()
                 .user(user)
                 .token(UUID.randomUUID().toString())
