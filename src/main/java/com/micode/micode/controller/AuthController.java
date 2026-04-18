@@ -97,7 +97,7 @@ public class AuthController {
         String email = authentication.getName();
         User user = userService.findByEmail(email);
 
-        refreshTokenService.deleteByUser(user);
+        userService.logout(user);
 
         return ResponseEntity.ok("Logged out successfully");
     }

@@ -4,6 +4,7 @@ import com.micode.micode.model.RefreshToken;
 import com.micode.micode.model.User;
 import com.micode.micode.repository.RefreshTokenRepository;
 import com.micode.micode.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,7 @@ public class RefreshTokenService {
 
     private final long refreshTokenDurationMs = 7 * 24 * 60 * 60 * 1000;
 
+    @Transactional
     public RefreshToken createRefreshToken(User user) {
 
         refreshTokenRepository.deleteByUser(user);

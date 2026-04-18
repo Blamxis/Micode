@@ -13,6 +13,7 @@ import com.micode.micode.repository.RoleRepository;
 import com.micode.micode.repository.UserRepository;
 import com.micode.micode.security.JwtService;
 import com.micode.micode.security.RateLimiterService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -194,6 +195,11 @@ public class UserService {
                 user.getEmail(),
                 user.getUsername()
         );
+    }
+
+    @Transactional
+    public void logout(User user) {
+        refreshTokenService.deleteByUser(user);
     }
 
     public User findByEmail(String email) {
