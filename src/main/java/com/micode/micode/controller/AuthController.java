@@ -71,6 +71,8 @@ public class AuthController {
 
         refreshTokenService.verifyExpiration(refreshToken);
 
+        refreshTokenService.delete(refreshToken);
+
         String newAccessToken = jwtService.generateToken(refreshToken.getUser().getEmail());
 
         RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(refreshToken.getUser());
