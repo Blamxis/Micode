@@ -1,9 +1,6 @@
 package com.micode.micode.service;
 
-import com.micode.micode.dto.LoginResponse;
-import com.micode.micode.dto.LoginRequest;
-import com.micode.micode.dto.RegisterRequest;
-import com.micode.micode.dto.RegisterResponse;
+import com.micode.micode.dto.*;
 import com.micode.micode.exception.EmailAlreadyUsedException;
 import com.micode.micode.exception.RoleNotFoundException;
 import com.micode.micode.model.RefreshToken;
@@ -206,4 +203,42 @@ public class UserService {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
+
+    public void changePassword(String email, ChangePasswordRequest request) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Current password is incorrect");
+        }
+
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "New password must be different from the current password"
+            );
+        }
+
+        String newPassword = request.getNewPassword();
+
+        if (newPassword.length() < 8) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password too weak (minimum 8 characters)");
+        }
+
+        if (!newPassword.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&._-]).{8,}$")) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Password must contain at least 1 uppercase, 1 lowercase, 1 number and 1 special character"
+            );
+        }
+
+        String encodedPassword = passwordEncoder.encode(newPassword);
+        user.setPassword(encodedPassword);
+
+        userRepository.save(user);
+
+        refreshTokenService.deleteByUser(user);
+    }
+
 }

@@ -101,4 +101,19 @@ public class AuthController {
 
         return ResponseEntity.ok("Logged out successfully");
     }
+
+    @PatchMapping("/change-password")
+    public ChangePasswordResponse changePassword(
+            Authentication authentication,
+            @Valid @RequestBody ChangePasswordRequest request
+    ) {
+        if (authentication == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated");
+        }
+
+        String email = authentication.getName();
+        userService.changePassword(email, request);
+
+        return new ChangePasswordResponse("Password updated successfully");
+    }
 }
