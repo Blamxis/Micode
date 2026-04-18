@@ -6,12 +6,14 @@ import com.micode.micode.dto.RegisterRequest;
 import com.micode.micode.dto.RegisterResponse;
 import com.micode.micode.exception.EmailAlreadyUsedException;
 import com.micode.micode.exception.RoleNotFoundException;
+import com.micode.micode.model.RefreshToken;
 import com.micode.micode.model.Role;
 import com.micode.micode.model.User;
 import com.micode.micode.repository.RoleRepository;
 import com.micode.micode.repository.UserRepository;
 import com.micode.micode.security.JwtService;
 import com.micode.micode.security.RateLimiterService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -32,6 +34,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final RateLimiterService rateLimiterService;
     private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
 
     public RegisterResponse register(RegisterRequest request, String clientIp) {
 
@@ -179,16 +182,24 @@ public class UserService {
             Thread.sleep(200);
         } catch (InterruptedException ignored) {}
 
-        String token = jwtService.generateToken(email);
+        String accessToken = jwtService.generateToken(email);
+
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
         log.info("User logged in: {}", email);
 
         return new LoginResponse(
                 "Login successful",
-                token,
+                accessToken,
+                refreshToken.getToken(),
                 user.getEmail(),
                 user.getUsername()
         );
+    }
+
+    @Transactional
+    public void logout(User user) {
+        refreshTokenService.deleteByUser(user);
     }
 
     public User findByEmail(String email) {
