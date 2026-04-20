@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,6 +26,7 @@ public class AuthController {
     private final JwtService jwtService;
     private final AuthService authService;
 
+    @RateLimiter(name = "register")
     @PostMapping("/register")
     public RegisterResponse register(@Valid @RequestBody RegisterRequest registerRequest, HttpServletRequest httpRequest) {
 
@@ -37,6 +39,7 @@ public class AuthController {
         return registerService.register(registerRequest, clientIp);
     }
 
+    @RateLimiter(name = "login")
     @PostMapping("/login")
     public LoginResponse login(@Valid @RequestBody LoginRequest loginRequest, HttpServletRequest httpRequest) {
         String clientIp = httpRequest.getHeader("X-Forwarded-For");
