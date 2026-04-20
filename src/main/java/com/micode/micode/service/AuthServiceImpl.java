@@ -54,6 +54,10 @@ public class AuthServiceImpl implements AuthService {
                         "Invalid email or password"
                 ));
 
+        if (!user.isEmailVerified()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Email not verified");
+        }
+
         String password = request.getPassword();
         if (password == null || password.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password is required");
