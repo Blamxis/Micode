@@ -24,6 +24,15 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
+    @Column(name = "email_verified")
+    private boolean emailVerified;
+
+    @Column(name = "email_verification_token")
+    private String emailVerificationToken;
+
+    @Column(name = "email_verification_expires_at")
+    private LocalDateTime emailVerificationExpiresAt;
+
     private String password;
 
     @Column(unique = true, nullable = false)

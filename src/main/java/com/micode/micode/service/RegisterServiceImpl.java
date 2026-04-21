@@ -16,9 +16,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -29,6 +31,8 @@ public class RegisterServiceImpl implements RegisterService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final RateLimiterService rateLimiterService;
+    private final EmailVerificationService emailVerificationService;
+    private final EmailService emailService;
 
     @Override
     public RegisterResponse register(RegisterRequest request, String clientIp) {
@@ -94,6 +98,7 @@ public class RegisterServiceImpl implements RegisterService {
         user.setEmail(request.getEmail());
         user.setPassword(encodedPassword);
         user.setUsername(request.getUsername());
+        user.setEmailVerified(false);
 
         Set<Role> roles = new HashSet<>();
         roles.add(role);
@@ -105,12 +110,40 @@ public class RegisterServiceImpl implements RegisterService {
 
         userRepository.save(user);
 
+        emailVerificationService.generateAndSendToken(user);
+
         log.info("New user registered: {}", user.getEmail());
 
         return new RegisterResponse(
-                "User registered successfully",
+                "User registered successfully. Please check your email to verify your account.",
                 user.getEmail(),
                 user.getUsername()
         );
     }
+
+    @Override
+    public void resendVerificationEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (user.isEmailVerified()) {
+            throw new RuntimeException("Email already verified");
+        }
+
+        String token = UUID.randomUUID().toString();
+        user.setEmailVerificationToken(token);
+        user.setEmailVerificationExpiresAt(LocalDateTime.now().plusHours(24));
+        userRepository.save(user);
+
+        String link = "http://localhost:8080/auth/verify-email?token=" + token;
+
+        emailService.sendEmail(
+                user.getEmail(),
+                "Verify your email",
+                "Click this link to verify your email:\n" + link
+        );
+
+        log.info("Verification email resent to: {}", email);
+    }
+
 }

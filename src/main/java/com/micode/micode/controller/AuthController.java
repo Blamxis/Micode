@@ -5,6 +5,7 @@ import com.micode.micode.model.RefreshToken;
 import com.micode.micode.model.User;
 import com.micode.micode.security.JwtService;
 import com.micode.micode.service.AuthService;
+import com.micode.micode.service.EmailVerificationService;
 import com.micode.micode.service.RefreshTokenService;
 import com.micode.micode.service.RegisterService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,6 +26,7 @@ public class AuthController {
     private final RefreshTokenService refreshTokenService;
     private final JwtService jwtService;
     private final AuthService authService;
+    private final EmailVerificationService emailVerificationService;
 
     @RateLimiter(name = "register")
     @PostMapping("/register")
@@ -123,4 +125,17 @@ public class AuthController {
 
         return new ChangePasswordResponse("Password updated successfully");
     }
+
+    @GetMapping("/verify-email")
+    public ResponseEntity<String> verifyEmail(@RequestParam String token) {
+        emailVerificationService.verifyEmail(token);
+        return ResponseEntity.ok("Email verified successfully");
+    }
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<?> resendVerification(@RequestBody @Valid ResendVerificationRequest request) {
+        registerService.resendVerificationEmail(request.email());
+        return ResponseEntity.ok("Verification email resent");
+    }
+
 }
