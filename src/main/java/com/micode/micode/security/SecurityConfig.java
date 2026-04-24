@@ -35,11 +35,14 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll()
                         .requestMatchers("/auth/verify-email").permitAll()
                         .requestMatchers("/auth/resend-verification").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/forgot-password").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/reset-password").permitAll()
                         .requestMatchers("/auth/logout").authenticated()
                         .anyRequest().authenticated()
                 )
                 .userDetailsService(customUserDetailsService)
-                .addFilterBefore(jwtAuthFilter, org.springframework.security.web.authentication.www.BasicAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
+
 
 
         return http.build();
