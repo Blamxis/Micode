@@ -4,10 +4,7 @@ import com.micode.micode.dto.*;
 import com.micode.micode.model.RefreshToken;
 import com.micode.micode.model.User;
 import com.micode.micode.security.JwtService;
-import com.micode.micode.service.AuthService;
-import com.micode.micode.service.EmailVerificationService;
-import com.micode.micode.service.RefreshTokenService;
-import com.micode.micode.service.RegisterService;
+import com.micode.micode.service.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +14,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import com.micode.micode.dto.ForgotPasswordRequest;
+import com.micode.micode.dto.ResetPasswordRequest;
+import com.micode.micode.service.ResetPasswordService;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -27,6 +28,7 @@ public class AuthController {
     private final JwtService jwtService;
     private final AuthService authService;
     private final EmailVerificationService emailVerificationService;
+    private final ResetPasswordService resetPasswordService;
 
     @RateLimiter(name = "register")
     @PostMapping("/register")
@@ -136,6 +138,18 @@ public class AuthController {
     public ResponseEntity<?> resendVerification(@RequestBody @Valid ResendVerificationRequest request) {
         registerService.resendVerificationEmail(request.email());
         return ResponseEntity.ok("Verification email resent");
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        resetPasswordService.createResetToken(request.email());
+        return ResponseEntity.ok("Reset password email sent");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
+        resetPasswordService.resetPassword(request.token(), request.newPassword());
+        return ResponseEntity.ok("Password updated successfully");
     }
 
 }
