@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+
+    <!-- Ignore les classes générées par Lombok -->
+    <Match>
+        <Class name="~.*\.model\..*"/>
+        <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+    </Match>
+
+    <!-- Ignore les DTOs (champs publics intentionnels) -->
+    <Match>
+        <Class name="~.*\.dto\..*"/>
+        <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+    </Match>
+
+    <!-- Ignore les faux positifs Spring Security sur les mots de passe -->
+    <Match>
+        <Class name="~.*\.security\..*"/>
+        <Bug pattern="HARD_CODE_PASSWORD"/>
+    </Match>
+
+</FindBugsFilter>
