@@ -141,7 +141,7 @@
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <version>3.3.1</version>
                 <configuration>
-                    <configLocation>checkstyle.xml</configLocation>
+                    <configLocation>sonar/checkstyle.xml</configLocation>
                     <failsOnError>false</failsOnError>
                     <consoleOutput>true</consoleOutput>
                     <outputFile>${project.build.directory}/checkstyle-result.xml</outputFile>
@@ -164,7 +164,7 @@
                     <effort>Max</effort>
                     <threshold>Medium</threshold>
                     <failOnError>false</failOnError>
-                    <excludeFilterFile>spotbugs-exclude.xml</excludeFilterFile>
+                    <excludeFilterFile>sonar/spotbugs-exclude.xml</excludeFilterFile>
                     <xmlOutput>true</xmlOutput>
                     <xmlOutputDirectory>${project.build.directory}</xmlOutputDirectory>
                 </configuration>
